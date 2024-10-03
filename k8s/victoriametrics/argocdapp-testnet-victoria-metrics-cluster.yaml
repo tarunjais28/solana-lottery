@@ -1,0 +1,200 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: testnet-victoria-metrics-cluster
+  namespace: argocd
+spec:
+  destination:
+    namespace: monitoring
+    name: in-cluster
+  project: default
+  source:
+    chart: victoria-metrics-cluster
+    helm:
+      # https://github.com/VictoriaMetrics/helm-charts/tree/master/charts/victoria-metrics-cluster
+      parameters:
+        - name: vmstorage.retentionPeriod
+          value: 1m
+      values: |-
+
+        vmselect:
+          horizontalPodAutoscaler:
+            enabled: false
+            maxReplicas: 2
+            minReplicas: 1
+            metrics:
+              - resource:
+                  name: memory
+                  target:
+                    averageUtilization: 90
+                    type: Utilization
+                type: Resource
+              - resource:
+                  name: cpu
+                  target:
+                    averageUtilization: 75
+                    type: Utilization
+                type: Resource
+          resources:
+            limits:
+              cpu: 5
+              memory: 2Gi
+            requests:
+              cpu: 1
+              memory: 1Gi
+          podDisruptionBudget:
+            enabled: true
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            annotations:
+              nginx.ingress.kubernetes.io/auth-secret: victoria-metrics-ingress-auth-hashed
+              nginx.ingress.kubernetes.io/auth-secret-type: auth-map
+              nginx.ingress.kubernetes.io/auth-type: basic
+            hosts:
+              - name: victoria-metrics.thegraph.com
+                path: /select
+                port: http
+            tls:
+              - secretName: vmselect-ingress-tls
+                hosts:
+                  - victoria-metrics.testnet.nezha.fi
+          statefulSet:
+            enabled: false
+          # persistentVolume:
+          #   enabled: true
+          #   size: 50Gi
+          #   storageClass: standard-retain
+          serviceMonitor:
+            enabled: true
+          tolerations:
+            - key: "victoriametrics"
+              operator: "Exists"
+              effect: "NoSchedule"
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: "victoriametrics"
+                        operator: In
+                        values:
+                          - "1"
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - vmselect
+                topologyKey: "kubernetes.io/hostname"
+
+        vminsert:
+          extraArgs:
+            maxLabelsPerTimeseries: 40
+          horizontalPodAutoscaler:
+            enabled: true
+            maxReplicas: 5
+            minReplicas: 2
+            metrics:
+              - resource:
+                  name: memory
+                  target:
+                    averageUtilization: 80
+                    type: Utilization
+                type: Resource
+              - resource:
+                  name: cpu
+                  target:
+                    averageUtilization: 70
+                    type: Utilization
+                type: Resource
+          resources:
+            limits:
+              cpu: 2
+              memory: 2Gi
+            requests:
+              cpu: 1
+              memory: 1Gi
+          podDisruptionBudget:
+            enabled: true
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            annotations:
+              nginx.ingress.kubernetes.io/auth-secret: victoria-metrics-ingress-auth-hashed
+              nginx.ingress.kubernetes.io/auth-secret-type: auth-map
+              nginx.ingress.kubernetes.io/auth-type: basic
+            hosts:
+              - name: victoria-metrics.testnet.nezha.fi
+                path: /insert
+                port: http
+            tls:
+              - secretName: vminsert-ingress-tls
+                hosts:
+                  - victoria-metrics.testnet.nezha.fi
+          serviceMonitor:
+            enabled: true
+          tolerations:
+            - key: "victoriametrics"
+              operator: "Exists"
+              effect: "NoSchedule"
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: "victoriametrics"
+                        operator: In
+                        values:
+                          - "1"
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - vminsert
+                topologyKey: "kubernetes.io/hostname"
+
+        vmstorage:
+          replicaCount: 5
+          retentionPeriod: 12
+          podDisruptionBudget:
+            enabled: true
+          persistentVolume:
+            size: 1000Gi
+            storageClass: standard-retain
+          serviceMonitor:
+            enabled: true
+          tolerations:
+            - key: "victoriametrics"
+              operator: "Exists"
+              effect: "NoSchedule"
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: "victoriametrics"
+                        operator: In
+                        values:
+                          - "1"
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - vmstorage
+                topologyKey: "kubernetes.io/hostname"
+
+    repoURL: https://victoriametrics.github.io/helm-charts/
+    targetRevision: 0.11.6
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+

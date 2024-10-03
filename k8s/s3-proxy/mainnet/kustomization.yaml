@@ -1,0 +1,44 @@
+resources:
+  - ../devnet
+
+patchesJson6902:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: s3-proxy-public-assets
+      namespace: kube-system
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0
+        value:
+          name: AWS_S3_BUCKET
+          value: mainnet-nezha-public-assets
+  - target:
+      version: v1
+      kind: ServiceAccount
+      name: s3-proxy
+      namespace: kube-system
+    patch: |-
+      - op: replace
+        path: /metadata/annotations
+        value:
+          eks.amazonaws.com/role-arn: arn:aws:iam::367391507260:role/mainnet-nezha-s3-proxy
+  - target:
+      group: external-secrets.io
+      version: v1alpha1
+      kind: ExternalSecret
+      name: s3proxy-ingress-auth-hashed
+      namespace: kube-system
+    patch: |-
+      - op: replace
+        path: /spec/data/0/remoteRef/key
+        value: /mainnet/admin/S3PROXY_INGRESS_AUTH
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: Ingress
+      name: s3-proxy-public-assets
+      namespace: kube-system
+    path: patch-ingress.yaml
+

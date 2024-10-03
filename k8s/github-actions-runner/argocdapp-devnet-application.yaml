@@ -1,0 +1,58 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devnet-github-actions-runner
+  namespace: argocd
+spec:
+  destination:
+    namespace: runners
+    name: in-cluster
+  project: default
+  source:
+    chart: actions-runner-controller
+    helm:
+      parameters:
+      - name: authSecret.name
+        value: github-runners-secrets
+      - name: syncPeriod
+        value: 30s
+      - name: serviceAccount.name
+        value: devnet-github-runners
+      values: |
+        nameOverride: ""
+        fullnameOverride: "devnet-github-runner"
+        serviceAccount:
+          annotations:
+            eks.amazonaws.com/role-arn: arn:aws:iam::440257901289:role/devnet-nezha-github-runners
+        podSecurityContext:
+          fsGroup: 65534
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 20Mi
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: workerGroup
+                  operator: In
+                  values:
+                  - "devnet-runners"
+        tolerations:
+        - key: scope
+          value: runners
+          operator: Equal
+          effect: NoSchedule
+    repoURL: https://actions-runner-controller.github.io/actions-runner-controller
+    targetRevision: 0.23.7
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+

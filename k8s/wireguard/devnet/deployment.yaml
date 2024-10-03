@@ -1,0 +1,65 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wireguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  strategy:
+    type: Recreate
+  template:
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: hello-world
+          image: bhargavshah86/kube-test:v0.1
+          ports:
+            - containerPort: 80
+        - name: wireguard
+          image: "linuxserver/wireguard:1.0.20210914"
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_MODULE
+          ports:
+            - containerPort: 51820
+              protocol: UDP
+          env:
+            - name: SERVERURL
+              value: wireguard.devnet.nezha.fi
+            - name: ALLOWEDIPS
+              value: 172.0.0.0/23,10.13.13.1/28,10.100.0.0/16
+            - name: PEERS
+              value: "ruslan,filipe,grygoryev,gubar,bohdan,porolo"
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: Europe/London
+            - name: PEERDNS
+              value: auto
+            - name: LOG_CONFS
+              value: "true"
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 150m
+            limits:
+              memory: 128Mi
+          volumeMounts:
+            - name: wg-config
+              mountPath: /config
+            - name: lib-module-volume
+              mountPath: /lib/modules
+      volumes:
+        - name: wg-config
+          persistentVolumeClaim:
+            claimName: wireguard-pvc
+        - name: lib-module-volume
+          hostPath:
+            path: /lib/modules

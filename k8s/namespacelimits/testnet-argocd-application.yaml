@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: testnet-namespacelimits
+  namespace: argocd
+  labels:
+    environment: testnet
+spec:
+  destination:
+    namespace: kube-system
+    name: testnet-nezha
+  project: default
+  source:
+    path: k8s/namespacelimits/testnet
+    repoURL: git@github.com:mlabs-haskell/nezha.git
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

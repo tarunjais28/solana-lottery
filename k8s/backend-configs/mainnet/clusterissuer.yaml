@@ -1,0 +1,38 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-stg
+spec:
+  acme:
+    email: rotaru86ruslan@gmail.com
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: certmanager-stg-account-key
+    solvers:
+    - selector:
+        dnsZones:
+          - "devnet.nezha.fi"
+      dns01:
+        route53:
+          region: eu-west-1
+          hostedZoneID: Z0249750PJPSHSQVTLUH
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prd
+spec:
+  acme:
+    email: rotaru86ruslan@gmail.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: certmanager-prd-account-key
+    solvers:
+    - selector:
+        dnsZones:
+          - "devnet.nezha.fi"
+      dns01:
+        route53:
+          region: eu-west-1
+          hostedZoneID: Z0249750PJPSHSQVTLUH
+

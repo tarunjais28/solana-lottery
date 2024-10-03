@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lottery
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  template:
+    spec:
+      serviceAccountName: default-irsa
+      containers:
+        - image: 367391507260.dkr.ecr.eu-west-1.amazonaws.com/lottery:latest
+          name: lottery
+          imagePullPolicy: Always
+          command:
+            - /app/api
+          resources:
+            limits:
+              cpu: 50m
+              memory: 150Mi
+            requests:
+              cpu: 50m
+              memory: 150Mi
+          env:
+            - name: APP_HOST
+              value: 0.0.0.0
+            - name: SOLANA_HTTP_RPC_URL
+              value: https://damp-solitary-smoke.solana-devnet.quiknode.pro
+            - name: SOLANA_STAKING_PROGRAM_ID
+              value: 8cbeV8n8dD4QbznCjTWw1avED18UZvwjn2igNZ6PpkiS
+            - name: SOLANA_VRF_PROGRAM_ID
+              value: 7CFmKHbdpxxfezzg6hHJKWT8gau8Js6kDbqs454fmXyW
+            - name: SOLANA_SPL_PROGRAM_ID
+              value: TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+            - name: SOLANA_ATA_PROGRAM_ID
+              value: ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL
+            - name: SOLANA_USDC_MINT
+              value: 7tWUTDppUCLm482XrHqZK5mqChepjVdWw6xAkGXRBLeC
+            - name: SOLANA_NEZ_MINT
+              value: 2bcp8A3d6gegsm2dST4ZKsk3RzBJAbco7bCXUYpGXSio
+            - name: FAUCET_RETRY_LIMIT_SECONDS
+              value: "86400"
+            - name: FAUCET_MINT_AMOUNT
+              value: "100"
+            - name: ENABLE_FAUCET
+              value: "true"
+            - name: SIGNUP_BONUS_SEQUENCE_COUNT
+              value: "0.5X"
+            - name: SIGNUP_BONUS_SEQUENCE_MIN_STAKE
+              value: "25"
+            - name: SIGNUP_BONUS_MIN_SEQUENCE_COUNT
+              value: "1"
+            - name: TRANSACTION_MAX_QUERY_LIMIT
+              value: "100"
+            - name: PRIZE_MAX_QUERY_LIMIT
+              value: "100"
+            - name: RUST_LOG
+              value: debug,hyper=off
+          envFrom:
+            - secretRef:
+                name: lottery-backends-secrets
+          ports:
+            - containerPort: 8080
+

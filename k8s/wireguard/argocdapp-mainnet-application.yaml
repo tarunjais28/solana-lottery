@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mainnet-wireguard
+  namespace: argocd
+  labels:
+    environment: mainnet
+spec:
+  destination:
+    namespace: kube-system
+    name: mainnet
+  project: default
+  source:
+    path: k8s/wireguard/mainnet
+    repoURL: git@github.com:NezhaLabs/nezha-monorepo.git
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+

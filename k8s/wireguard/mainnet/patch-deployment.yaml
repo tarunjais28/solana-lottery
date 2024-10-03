@@ -1,0 +1,11 @@
+- op: replace
+  path: /spec/template/spec/containers/1/env/0
+  value:
+    name: SERVERURL
+    value: wireguard.nezha.fi
+- op: replace
+  path: /spec/template/spec/containers/1/env/1
+  value:
+    name: ALLOWEDIPS
+    value: 10.0.0.0/23,10.13.13.1/28,10.100.0.0/16
+

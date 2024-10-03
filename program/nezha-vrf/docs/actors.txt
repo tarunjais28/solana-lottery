@@ -1,0 +1,63 @@
+Actors and Capabilities
+=======================
+
+=> SuperAdmin
+	- Init contract
+	- Rotate keys
+
+=> Admin
+	- Create epoch
+	- Approve/Complete/Close stake&unstake requests.
+	- Invest
+		- Manual Investment
+			Move funds into Investor's USDC ATA.
+			Investor is supposed to manually invest it into some protocol and return it back.
+		- Francium protocol
+			Move funds into the Francium protocol.
+
+	- Withdraw Investment
+		- Francium protocol
+			Move funds out of the Francium protocol.
+
+	- Publish Winning Combination
+		Generate a winning combination off-chain. 
+		Then upload it to the chain.
+
+	- Publish Winners
+		Check the tickets of users and decide who are the winners off-chain.
+		Then upload the list of winners to the chain.
+
+	- Withdraw Vault { vault = Treasury/Insurance } 
+		Move funds out of the treasury vault to pay the running costs.
+		Move funds out of the Insurance vault to pay the jackpot insurance provider.
+
+	- Fund Jackpot
+		In the event of a jackpot win, ask insurance provider for the money.
+		Once we have it in Admin's USDC ATA, call this instruction to move it to
+		Tier-1 Prize Vault and mark the jackpot as claimable.
+
+=> Investor
+	- Withdraw Investment
+		Move funds from Investor's USDC ATA and return it into the protocol.
+
+=> User
+	- RequestStakeUpdate { amount }
+		if amount > 0, it's considered as a deposit request
+		if amount < 0, it's considered as a withdraw request
+
+	- Unstake { amount }
+
+	- Claim prize { epoch_index, tier }
+		The prize amount is re-invested up on calling this instruction.
+
+PDA Actors
+==========
+
+=> Vault Authority
+	`owner` of Vault token accounts.
+	Instructions moving funds out of any vaults must include this account.
+
+=> Francium Authority
+	`owner` of the USDC ATA used to move funds into/out of Francium.
+	Probably also recorded as some kind of `owner` in Francium internal state accounts.
+	Instructions moving funds into/out of francium must include this account.

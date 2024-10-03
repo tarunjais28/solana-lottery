@@ -1,0 +1,4 @@
+- op: replace
+  path: /spec/csi/volumeHandle
+  value: fs-08f08a3fd82e6c877::fsap-0023309177ac77329
+

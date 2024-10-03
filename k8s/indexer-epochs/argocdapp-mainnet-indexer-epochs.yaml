@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  # annotations:
+  #   notifications.argoproj.io/subscribe.app-deleted.slack: deploys-mainnet;alerts-mainnet
+  #   notifications.argoproj.io/subscribe.on-deployed.slack: deploys-mainnet
+  #   notifications.argoproj.io/subscribe.on-health-degraded.slack: alerts-mainnet
+  #   notifications.argoproj.io/subscribe.on-sync-failed.slack: alerts-mainnet
+  #   notifications.argoproj.io/subscribe.on-sync-status-unknown.slack: alerts-mainnet
+  labels:
+    environment: mainnet
+  name: mainnet-indexer-epochs
+  namespace: argocd
+spec:
+  destination:
+    namespace: default
+    name: mainnet
+  project: default
+  source:
+    path: k8s/indexer-epochs/mainnet
+    repoURL: git@github.com:NezhaLabs/nezha-monorepo.git
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+

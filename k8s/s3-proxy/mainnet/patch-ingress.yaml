@@ -1,0 +1,8 @@
+- op: replace
+  path: /spec/rules/0/host
+  value: s3-proxy-public-assets.nezha.fi
+
+- op: replace
+  path: /spec/tls/0/hosts/0
+  value: s3-proxy-public-assets.nezha.fi
+

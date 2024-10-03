@@ -1,0 +1,7 @@
+namespace: runners
+
+resources:
+  - backend-repo.yaml
+  - artkai-platform-repo.yaml
+  - artkai-api-repo.yaml
+  - secrets.yaml

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: s3-proxy-public-assets
+spec:
+  replicas: 1
+  template:
+    metadata:
+    spec:
+      serviceAccountName: s3-proxy
+      securityContext:
+        fsGroup: 65534
+      containers:
+        - image: pottava/s3-proxy:2.0
+          name: s3-proxy-public-assets
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: AWS_S3_BUCKET
+              value: "devnet-nezha-public-assets"
+            - name: AWS_REGION
+              value: "eu-west-1"
+            - name: DIRECTORY_LISTINGS
+              value: "true"
+            - name: DIRECTORY_LISTINGS_FORMAT
+              value: "html"
+          ports:
+            - containerPort: 80
+

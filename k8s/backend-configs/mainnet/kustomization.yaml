@@ -1,0 +1,36 @@
+resources:
+  - ../devnet
+
+patchesJson6902:
+  - target:
+      version: v1
+      kind: ServiceAccount
+      name: default-irsa
+    patch: |-
+      - op: replace
+        path: /metadata/annotations
+        value:
+          eks.amazonaws.com/role-arn: arn:aws:iam::367391507260:role/mainnet-nezha-default-irsa
+  - target:
+      version: v1
+      kind: ServiceAccount
+      name: default-irsa
+      namespace: kube-system
+    patch: |-
+      - op: replace
+        path: /metadata/annotations
+        value:
+          eks.amazonaws.com/role-arn: arn:aws:iam::367391507260:role/mainnet-nezha-default-irsa
+  - target:
+      group: cert-manager.io
+      version: v1
+      kind: ClusterIssuer
+      name: letsencrypt-prd
+    path: patch-clusterissuer.yaml
+  - target:
+      group: cert-manager.io
+      version: v1
+      kind: ClusterIssuer
+      name: letsencrypt-stg
+    path: patch-clusterissuer.yaml
+

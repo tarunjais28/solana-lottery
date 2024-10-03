@@ -1,0 +1,41 @@
+[package]
+name = "staking"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "staking"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+test-bpf = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = { workspace = true, features = ["init-if-needed"] }
+anchor-spl = {workspace = true}
+spl-token = {workspace = true}
+borsh.workspace = true
+solana-zk-token-sdk = {workspace=true}
+
+
+[dev-dependencies]                                                                                                          
+anchor-client = {workspace = true} 
+solana-program = {workspace = true} 
+solana-program-test = {workspace = true}                                                                                            
+solana-sdk = {workspace = true}
+ed25519-dalek = "1.0.1"
+spl-token = {workspace = true}
+anyhow = "1"
+rand = "0.7"
+rand_core = "0.5"
+# mpl-token-metadata = "=1.3.5"
+mpl-token-metadata = "=4.1.2"
+spl-associated-token-account = {workspace = true}
+chrono = "0.4"
+uuid = {version = "1.2.1", features = ["v4"],  default-features = false }

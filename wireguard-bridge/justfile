@@ -1,0 +1,27 @@
+# List available commands
+_list:
+	@just -lu
+
+# Create the docker network needed by caddy
+_create-caddy-network:
+	if ! docker network ls | grep -q caddy; then docker network create caddy; fi
+
+_start-caddy: _create-caddy-network
+	cd caddy && docker-compose up -d
+
+_restart-caddy: _create-caddy-network
+	cd caddy && docker-compose down && docker-compose up -d
+
+# Start caddy and wireguard
+start: _start-caddy start-wireguard
+
+# Start wireguard only. Useful if you have a separate system wide docker-caddy service running
+start-wireguard:
+	cd wireguard && docker-compose up -d
+
+# Restart caddy and wireguard
+restart: _restart-caddy restart-wireguard
+
+# Restart wireguard only
+restart-wireguard:
+	cd wireguard && docker-compose down && docker-compose up -d

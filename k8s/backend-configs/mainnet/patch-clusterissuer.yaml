@@ -1,0 +1,8 @@
+- op: replace
+  path: /spec/acme/solvers/0/dns01/route53/hostedZoneID
+  value: Z09759211LW2VNE1Q9A9C
+
+- op: replace
+  path: /spec/acme/solvers/0/selector/dnsZones/0
+  value: nezha.fi
+

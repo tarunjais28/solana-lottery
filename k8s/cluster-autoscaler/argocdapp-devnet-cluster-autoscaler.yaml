@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devnet-cluster-autoscaler
+  namespace: argocd
+spec:
+  destination:
+    name: in-cluster
+    namespace: kube-system
+  project: default
+  source:
+    chart: cluster-autoscaler
+    helm:
+      values: |-
+        autoDiscovery:
+          tags:
+            - k8s.io/cluster-autoscaler/enabled
+            - k8s.io/cluster-autoscaler/devnet-nezha
+        service:
+          annotations:
+            eks.amazonaws.com/role-arn: "arn:aws:iam::440257901289:role/devnet-nezha-cluster-autoscaler"
+        #serviceMonitor:
+        #  enabled: true
+    repoURL: https://kubernetes.github.io/autoscaler
+    targetRevision: 9.36.0
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+

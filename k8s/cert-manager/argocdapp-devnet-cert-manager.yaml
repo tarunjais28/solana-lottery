@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devnet-cert-manager
+  namespace: argocd
+spec:
+  destination:
+    name: in-cluster
+    namespace: cert-manager
+  project: default
+  source:
+    chart: cert-manager
+    repoURL: https://charts.jetstack.io
+    targetRevision: v1.14.4
+    helm:
+      parameters:
+        - name: installCRDs
+          value: 'true'
+      values: |-
+        serviceAccount:
+          name: cert-manager
+          annotations:
+            eks.amazonaws.com/role-arn: arn:aws:iam::440257901289:role/devnet-nezha-cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+

@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: testnet-grafana-configs
+  namespace: argocd
+  labels:
+    environment: testnet
+spec:
+  destination:
+    namespace: default
+    name: testnet-nezha
+  project: default
+  source:
+    path: k8s/grafana/testnet
+    repoURL: git@github.com:mlabs-haskell/nezha.git
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

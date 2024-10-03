@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  # annotations:
+  #   notifications.argoproj.io/subscribe.app-deleted.slack: deploys-devnet;alerts-devnet
+  #   notifications.argoproj.io/subscribe.on-deployed.slack: deploys-devnet
+  #   notifications.argoproj.io/subscribe.on-health-degraded.slack: alerts-devnet
+  #   notifications.argoproj.io/subscribe.on-sync-failed.slack: alerts-devnet
+  #   notifications.argoproj.io/subscribe.on-sync-status-unknown.slack: alerts-devnet
+  labels:
+    environment: devnet
+  name: devnet-indexer-epochs
+  namespace: argocd
+spec:
+  destination:
+    namespace: default
+    name: in-cluster
+  project: default
+  source:
+    path: k8s/indexer-epochs/devnet
+    repoURL: git@github.com:NezhaLabs/nezha-monorepo.git
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+

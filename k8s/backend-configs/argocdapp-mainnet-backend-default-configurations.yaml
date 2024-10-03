@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mainnet-backend-configs
+  namespace: argocd
+  labels:
+    environment: mainnet
+spec:
+  destination:
+    namespace: default
+    name: mainnet
+  project: default
+  source:
+    path: k8s/backend-configs/mainnet
+    repoURL: git@github.com:NezhaLabs/nezha-monorepo.git
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+

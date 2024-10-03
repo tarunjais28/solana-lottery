@@ -1,0 +1,33 @@
+# List available commands
+_list:
+	@just --justfile {{justfile()}} --list
+
+# Start the local test environment
+start-local-test-env:
+	cargo build-sbf --manifest-path ./staking/Cargo.toml
+	cargo build-sbf --manifest-path ./nezha-staking/Cargo.toml
+	just _dc up --detach
+	just _dc logs --follow validator-setup
+
+# Start the local test environment
+stop-local-test-env:
+	just _dc stop
+
+# Destroy and clean the local test environment
+destroy-local-test-env:
+	just _dc down
+
+_dc *args:
+	docker-compose -p nezha-local-test-env -f ./local-test-env/docker-compose.yml {{args}}
+
+# Run the nez token cli
+nez-cli *args:
+	cargo run -p nez-cli -- {{ if args == "" { "--help" } else { args } }}
+	 
+# Run the nezha staking cli
+nezha-staking-cli *args:
+	cargo run -p nezha-staking-cli -- {{args}}
+
+# Test coverage menu
+coverage *args:
+	@just -f coverage.just {{args}}

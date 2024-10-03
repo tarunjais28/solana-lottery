@@ -1,0 +1,19 @@
+[package]
+name = "nezha-testing"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# Language extras
+anyhow = "1.0"
+async-trait = "0.1"
+
+# Solana
+bincode = "1.3.1"
+solana-program-test = {workspace = true}
+solana-program = {workspace = true}
+solana-sdk = {workspace = true}
+spl-associated-token-account = { workspace = true, features = ["no-entrypoint"] }
+spl-token = { workspace = true, features = ["no-entrypoint"] }

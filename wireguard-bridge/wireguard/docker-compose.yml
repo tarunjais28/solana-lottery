@@ -1,0 +1,55 @@
+services:
+  prod:
+    build:
+      context: .
+    volumes:
+      - ./wg-configs/nezha-prod.conf:/etc/wireguard/wg0.conf
+    cap_add:
+      - NET_ADMIN
+    labels:
+      caddy: http://nezha-prod.localhost
+      caddy.reverse_proxy: "http://prod"
+    networks:
+      - caddy
+  testnet2:
+    build:
+      context: .
+    volumes:
+      - ./wg-configs/nezha-prod.conf:/etc/wireguard/wg0.conf
+    cap_add:
+      - NET_ADMIN
+    environment:
+      TESTNET2: 1
+    labels:
+      caddy: http://nezha-testnet2.localhost
+      caddy.reverse_proxy: "http://testnet2"
+    networks:
+      - caddy
+  testnet:
+    build:
+      context: .
+    volumes:
+      - ./wg-configs/nezha-testnet.conf:/etc/wireguard/wg0.conf
+    cap_add:
+      - NET_ADMIN
+    labels:
+      caddy: http://nezha-testnet.localhost
+      caddy.reverse_proxy: "http://testnet"
+    networks:
+      - caddy
+  staging:
+    build:
+      context: .
+    volumes:
+      - ./wg-configs/nezha-staging.conf:/etc/wireguard/wg0.conf
+    cap_add:
+      - NET_ADMIN
+    labels:
+      caddy: http://nezha-staging.localhost
+      caddy.reverse_proxy: "http://staging"
+    networks:
+      - caddy
+
+networks:
+  caddy:
+    external: true

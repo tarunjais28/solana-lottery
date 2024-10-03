@@ -1,0 +1,26 @@
+How to get development env running
+==================================
+
+* Install just:
+	https://github.com/casey/just
+
+* Run `source .env` at the root of the repo.
+
+* Run `just dev` at the root of the repo.
+	It will spin up a docker container that has the contract deployed and initialized.
+
+Demo CLI 
+========
+
+* Go to <repo-root>/backend/lottery/demo
+	Run `just cycle-epoch` to run a full cycle of epoch.
+
+	Read `cycle-epoch` section of the justfile to see the individual steps in cycling an epoch.
+	You may run those steps manually to test with different parameters.
+
+* Commands to see state:
+	- just show-latest-epoch
+	- just show-epoch <epoch-index>
+	- just show-stake
+	- just show-latest-epoch-winners
+	- just show-epoch-winners <epoch-index>

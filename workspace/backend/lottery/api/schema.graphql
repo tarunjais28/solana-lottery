@@ -1,0 +1,242 @@
+type Balance {
+	amount: String!
+	currency: String!
+}
+"""
+Implement the DateTime<Utc> scalar
+
+The input/output is a string in RFC3339 format.
+"""
+scalar DateTime
+enum DrawEnabled {
+	WAITING
+	DRAW
+	NO_DRAW
+}
+"""
+Epoch represents the on-chain epoch.
+
+Prizes are the defined prizes for the epoch, winners represent the wallets that have won and how much they won.
+If if there are no wins the prize sizes are calculated and present, they will just have the empty Winner vec.
+total_value_locked is in amount equivalent (USDC*10^6)
+"""
+type Epoch {
+	pubkey: WalletAddr!
+	index: Int!
+	status: EpochStatus!
+	prizes: TieredPrizes!
+	winningCombination: [Int!]
+	totalValueLocked: String
+	totalReturned: String
+	startedAt: DateTime!
+	expectedEndDate: DateTime!
+	endedAt: DateTime
+	drawEnabled: DrawEnabled!
+	winners: EpochWinners
+}
+enum EpochStatus {
+	RUNNING
+	YIELDING
+	FINALISING
+	ENDED
+}
+type EpochWinners {
+	tier1Meta: TierWinnersMeta!
+	tier2Meta: TierWinnersMeta!
+	tier3Meta: TierWinnersMeta!
+	jackpotClaimable: Boolean!
+	winners: [Winner!]!
+}
+enum Investor {
+	FRACIUM
+	FAKE
+}
+"""
+Represents the latest USDC faucet transaction for a user.
+Amount is USDC value * 10^pow(decimals).
+"""
+type LatestMintTransaction {
+	wallet: WalletAddr!
+	amount: String!
+	transactionTime: String!
+	transactionId: TransactionId!
+}
+type Mutation {
+	createEpoch(prizes: PrizesInput!, expectedDurationMinutes: Int!, yieldSplitCfg: YieldSplitCfgInput!): Epoch!
+	publishWinningCombination(winningCombination: [Int!]!): Epoch!
+	publishWinners: Epoch!
+	enterInvestment(investor: Investor!): Epoch!
+	exitInvestment(investor: Investor!, returnAmount: String): Epoch!
+	fundJackpot: Epoch!
+	approveStakeUpdate(wallet: WalletAddr!): StakeUpdate!
+	completeStakeUpdate(wallet: WalletAddr!): StakeUpdate!
+	mintDevnetUsdc(wallet: WalletAddr!): LatestMintTransaction!
+	generateTicket(wallet: WalletAddr!): Ticket!
+	generateTicketsForAll: [Ticket!]!
+	updateArweaveUrl(wallet: WalletAddr!, epochIndex: Int!, arweaveUrl: String!): Ticket
+	updateRisqIds(epochIndex: Int!, risqIds: [WalletRisqId!]!): [Ticket!]!
+}
+type Prize {
+	wallet: WalletAddr!
+	epochIndex: Int!
+	page: Int!
+	winnerIndex: Int!
+	tier: Int!
+	amount: String!
+	claimable: Boolean!
+	claimed: Boolean!
+}
+"""
+Represents all the prizes of an epoch.
+
+PrizesInput enforces that every tier has a defined prizes.
+"""
+input PrizesInput {
+	tier1: String!
+	tier2YieldShare: Int!
+	tier3YieldShare: Int!
+}
+type Query {
+	latestEpoch(useCache: Boolean! = true): Epoch
+	epochs: [Epoch!]!
+	epoch(index: Int!, useCache: Boolean! = true): Epoch
+	epochByPubkey(pubkey: WalletAddr!): Epoch
+	walletPrizes(wallet: WalletAddr!): [UserPrize!]!
+	balances(wallet: WalletAddr!): [Balance!]!
+	balance(wallet: WalletAddr!): String!
+	nezBalance(wallet: WalletAddr!): String!
+	stakeUpdatesByWallet(wallet: WalletAddr!): [StakeUpdate!]!
+	stakeUpdate(transactionId: TransactionId!): StakeUpdate
+	allStakeUpdateRequests: [StakeUpdateRequest!]!
+	numberOfUsers: Int!
+	transactionsByWallet(wallet: WalletAddr!, limit: Int!, offset: Int!): [Transaction!]!
+	transactionsByType(transactionType: TransactionType!, limit: Int!, offset: Int!): [Transaction!]!
+	transactionsByWalletAndType(wallet: WalletAddr!, transactionType: TransactionType!, limit: Int!, offset: Int!): [Transaction!]!
+	totalDepositByWallet(wallet: WalletAddr!): String!
+	prizesByWallet(wallet: WalletAddr!, limit: Int!, offset: Int!): [Prize!]!
+	totalPrizeByWallet(wallet: WalletAddr!): String!
+	ticket(wallet: WalletAddr!, epochIndex: Int!): Ticket
+	ticketPrice: String!
+	ticketsByEpochIndexAndPrefix(epochIndex: Int!, limit: Int!, prefix: [Int!]!): TicketsWithCount!
+	unsubmittedTickets(epochIndex: Int!): [Ticket!]!
+	calculateOptimalWinningCombination: [Int!]
+	randomWinningCombination: [Int!]
+	numSignupBonusSequences(wallet: WalletAddr!, amount: String!): Int!
+	drawsPlayedByWallet(wallet: WalletAddr!): Int!
+}
+type Sequence {
+	nums: [Int!]!
+	sequenceType: SequenceType!
+}
+enum SequenceType {
+	NORMAL
+	SIGN_UP_BONUS
+	AIRDROP_BONUS
+}
+type StakeUpdate {
+	amount: String!
+	transactionId: TransactionId
+	state: StakeUpdateState!
+	type: StakeUpdateType!
+	currency: String!
+	mint: String!
+}
+type StakeUpdateRequest {
+	owner: WalletAddr!
+	amount: Int!
+	state: StakeUpdateRequestState!
+}
+enum StakeUpdateRequestState {
+	PENDING_APPROVAL
+	QUEUED
+}
+enum StakeUpdateState {
+	PENDING
+	FAILED
+	COMPLETED
+}
+enum StakeUpdateType {
+	DEPOSIT
+	WITHDRAW
+}
+type Ticket {
+	wallet: WalletAddr!
+	epochIndex: Int!
+	arweaveUrl: String
+	sequences: [Sequence!]!
+	balance: String!
+	price: String!
+}
+type TicketsWithCount {
+	tickets: [Ticket!]!
+	count: Int!
+}
+type TierWinnersMeta {
+	totalPrize: String!
+	totalNumWinners: Int!
+	totalNumWinningTickets: Int!
+}
+"""
+TieredPrizes represent the prize definition for an epoch. For won prizes see [`EpochWinners`].
+"""
+type TieredPrizes {
+	tier1: String!
+	tier2YieldShare: Int!
+	tier3YieldShare: Int!
+}
+type Transaction {
+	transactionId: TransactionId!
+	wallet: WalletAddr!
+	amount: String!
+	mint: WalletAddr!
+	time: DateTime
+	transactionType: TransactionType!
+}
+scalar TransactionId
+enum TransactionType {
+	DEPOSIT_ATTEMPT
+	DEPOSIT_CANCELLED
+	DEPOSIT_APPROVED
+	DEPOSIT_COMPLETED
+	WITHDRAW_ATTEMPT
+	WITHDRAW_CANCELLED
+	WITHDRAW_APPROVED
+	WITHDRAW_COMPLETED
+	CLAIM
+}
+"""
+Represents a prize where the user is part of the winners, the Epoch is a pubkey, which can be used to retrieve
+the epoch as well. This is a slow operation so the pubkey is returned to avoid unnecessary operations.
+"""
+type UserPrize {
+	epochIndex: Int!
+	page: Int!
+	winnerIndex: Int!
+	tier: Int!
+	amount: String!
+	claimed: Boolean!
+}
+scalar WalletAddr
+input WalletRisqId {
+	wallet: WalletAddr!
+	risqId: String!
+}
+"""
+Winner represents a single winner of a prize, the amount they earned. Amount is USDC value * 10^(-decimals)
+"""
+type Winner {
+	index: Int!
+	address: WalletAddr!
+	tier: Int!
+	prize: String!
+	claimed: Boolean!
+}
+input YieldSplitCfgInput {
+	insurancePremium: String!
+	insuranceProbability: String!
+	treasuryRatio: String!
+}
+schema {
+	query: Query
+	mutation: Mutation
+}

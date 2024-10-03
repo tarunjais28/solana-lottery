@@ -1,0 +1,12 @@
+namespace: kube-system
+
+resources:
+  - secrets.yaml
+  - deployment-public-assets.yaml
+  - serviceaccount.yaml
+  - service.yaml
+  - ingress.yaml
+
+commonLabels:
+  app: s3-proxy
+

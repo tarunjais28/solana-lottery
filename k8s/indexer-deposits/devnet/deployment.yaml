@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: indexer-deposits
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+  template:
+    spec:
+      terminationGracePeriodSeconds: 10
+      serviceAccountName: default-irsa
+      containers:
+        - image: 440257901289.dkr.ecr.eu-west-1.amazonaws.com/indexer-deposits:latest
+          name: indexer-deposits
+          imagePullPolicy: Always
+          command:
+            - /app/indexer_deposits
+          resources:
+            limits:
+              cpu: 10m
+              memory: 100Mi
+            requests:
+              cpu: 10m
+              memory: 100Mi
+          env:
+            - name: INDEXER_NEZHA_GRAPHQL_URL
+              value: "http://lottery.internal.service/"
+            - name: INDEXER_PUBSUB_RETRY_DELAY_MS
+              value: "5000"
+            - name: SOLANA_HTTP_RPC_URL
+              value: https://damp-solitary-smoke.solana-devnet.quiknode.pro
+            - name: SOLANA_WS_RPC_URL
+              value: https://damp-solitary-smoke.solana-devnet.quiknode.pro
+            - name: INDEXER_DEPOSITS_SOLANA_PROGRAM_ID
+              value: 7yxNN4Mkgap3LR4f5MdZBTtdTucSDMBcJvxbnfRcLFyV
+            - name: INDEXER_DEPOSITS_POLL_FREQ_MS
+              value: "600000" # 10 mins
+            - name: INDEXER_DEPOSITS_BATCH_GAP_MS
+              value: "2000"
+            - name: INDEXER_DEPOSITS_BATCH_SIZE
+              value: "10"
+            - name: INDEXER_TICKETS_POLL_FREQ_MS
+              value: "600000" # 10 mins
+            - name: RUST_LOG
+              value: debug,hyper=off
+          envFrom:
+            - secretRef:
+                name: indexer-deposits-secrets
+

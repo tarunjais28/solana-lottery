@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: indexer-transactions
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  template:
+    spec:
+      serviceAccountName: default-irsa
+      terminationGracePeriodSeconds: 10
+      containers:
+        - image: 440257901289.dkr.ecr.eu-west-1.amazonaws.com/indexer-transactions:latest
+          name: indexer-transactions
+          imagePullPolicy: Always
+          command:
+            - /app/indexer_transactions
+          resources:
+            limits:
+              cpu: 10m
+              memory: 100Mi
+            requests:
+              cpu: 10m
+              memory: 100Mi
+          env:
+            - name: SOLANA_HTTP_RPC_URL
+              value: https://damp-solitary-smoke.solana-devnet.quiknode.pro
+            - name: SOLANA_STAKING_PROGRAM_ID
+              value: 7yxNN4Mkgap3LR4f5MdZBTtdTucSDMBcJvxbnfRcLFyV
+            - name: SOLANA_USDC_MINT
+              value: 7tWUTDppUCLm482XrHqZK5mqChepjVdWw6xAkGXRBLeC
+            - name: INDEXER_TRANSACTIONS_RETRY_DELAY_SECONDS
+              value: "10"
+            - name: INDEXER_TRANSACTIONS_BATCH_SIZE
+              value: "50"
+            - name: TRANSACTION_MAX_QUERY_LIMIT
+              value: "100"
+            - name: RUST_LOG
+              value: debug,hyper=off
+          envFrom:
+            - secretRef:
+                name: indexer-transactions-secrets
+

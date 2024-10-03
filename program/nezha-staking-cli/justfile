@@ -1,0 +1,30 @@
+init:
+	cargo run init
+
+cycle-epoch:
+	cargo run replenish-sols # Airdrop some SOLs to the wallets involved
+	cargo run create-epoch # Admin: Create a new epoch
+	cargo run attempt-deposit 100.0 # User: attempt to deposit 100 USDC into the contract
+	cargo run approve-deposit # Admin: Approve the pending deposit of the user
+	cargo run complete-deposit # Admin: Complete the pending deposit of the user
+	cargo run yield-withdraw  # Admin: Move funds from deposits vault to investor's account
+	cargo run yield-deposit 200.0 # Investor: Return 200.0 USDC back to the contract.
+	cargo run publish-combination # Admin: Publish a hardcoded winning sequence
+	cargo run publish-winners # Admin: Publish user as the winner
+
+show-latest-epoch:
+	cargo run show-latest-epoch
+
+show-epoch epoch:
+	cargo run show-epoch {{epoch}}
+
+show-stake:
+	cargo run show-stake
+
+show-latest-epoch-winners:
+	cargo run show-latest-epoch-winners
+
+show-epoch-winners epoch:
+	cargo run show-epoch-winners {{epoch}}
+
+

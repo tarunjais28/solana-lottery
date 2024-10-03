@@ -1,0 +1,44 @@
+[workspace]
+members = [
+    "nezha-staking",
+    "nezha-staking-lib",
+    "staking",
+    "francium/lending-pool",
+    "francium/lending-rewards-pool",
+    "nezha-staking-cli",
+    "nez-cli",
+    "nezha-vrf",
+    "nezha-vrf-mock",
+    "nezha-vrf-lib",
+    "nezha-vrf-cli",
+    "nezha-utils",
+    "nezha-testing",
+]
+
+[workspace.package]
+edition = "2021"
+
+[workspace.dependencies]
+anchor-lang = {version="=0.28.0", features=["init-if-needed"]}
+anchor-spl = {version="=0.28.0"}
+anchor-client = {version="=0.28.0"}
+spl-token = "=4.0.0"
+spl-token-2022 = "=0.6.0"
+spl-associated-token-account = "=1.1.3"
+ed25519-dalek = "1.0.1"
+rand = "0.7"
+rand_core = "0.5"
+zstd = "0.11.2+zstd.1.5.2"
+zstd-safe = "=5.0.1"
+zstd-sys = "=2.0.1"
+solana-account-decoder = "=1.16.27"
+solana-client = "=1.16.27"
+solana-program = "=1.16.27"
+solana-program-test = "=1.16.27"
+solana-sdk = "=1.16.27"
+solana-transaction-status = "=1.16.27"
+solana-clap-utils = "=1.16.27"
+solana-cli-config = "=1.16.27"
+solana-zk-token-sdk = "=1.16.27"
+borsh = "0.10"
+switchboard-v2 = "=0.4.0"

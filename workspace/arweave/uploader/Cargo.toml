@@ -1,0 +1,25 @@
+[package]
+name = "arweave-uploader"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0"
+async-trait = "0.1.52"
+avro-rs = "0.13.0"
+http = "0.2.6"
+lazy_static = "1.4.0"
+mime = "0.3.16"
+openssl = "0.10.38"
+reqwest = "0.11.9"
+ring = "0.16.20"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+solana-client = {workspace = true}
+solana-sdk = {workspace = true}
+thiserror = "1.0.30"
+
+[dev-dependencies]
+rand = "0.8"
+tokio = "1"
+tokio-test = "0.4.2"

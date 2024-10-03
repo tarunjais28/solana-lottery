@@ -1,0 +1,7 @@
+resources:
+  - deployment.yaml
+  - secrets.yaml
+
+commonLabels:
+  app: indexer-transactions
+

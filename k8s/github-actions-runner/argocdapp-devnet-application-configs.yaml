@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devnet-github-actions-runner-configs
+  namespace: argocd
+  labels:
+    environment: devnet
+spec:
+  destination:
+    namespace: actions-runner-system
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: k8s/github-actions-runner
+    repoURL: git@github.com:NezhaLabs/nezha-monorepo.git
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+

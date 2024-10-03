@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devnet-external-dns
+  namespace: argocd
+spec:
+  destination:
+    name: in-cluster
+    namespace: external-dns
+  project: default
+  source:
+    chart: external-dns
+    helm:
+      values: |-
+        serviceAccount:
+          create: true
+          name: external-dns
+          annotations:
+            eks.amazonaws.com/role-arn: arn:aws:iam::440257901289:role/devnet-nezha-external-dns
+        domainFilters:
+          - devnet.nezha.fi
+          - internal.service
+        txtOwnerId: devnet.nezha.fi
+    repoURL: https://kubernetes-sigs.github.io/external-dns/
+    targetRevision: 1.14.3
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+

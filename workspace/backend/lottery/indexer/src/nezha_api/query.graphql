@@ -1,0 +1,131 @@
+query LatestEpoch {
+  latestEpoch(useCache: false) {
+    index
+    pubkey
+    status
+    prizes {
+      tier1
+      tier2YieldShare
+      tier3YieldShare
+    }
+    totalValueLocked
+    winningCombination
+    winners {
+      tier1Meta {
+        totalNumWinners
+        totalPrize
+      }
+      tier2Meta {
+        totalNumWinners
+        totalPrize
+      }
+      tier3Meta {
+        totalNumWinners
+        totalPrize
+      }
+      jackpotClaimable
+      winners {
+        address
+      }
+    }
+    expectedEndDate
+    drawEnabled
+  }
+}
+
+query UnsubmittedTickets($epochIndex: Int!) {
+  unsubmittedTickets(epochIndex: $epochIndex) {
+    wallet
+    sequences {
+      nums
+      sequenceType
+    }
+  }
+}
+
+mutation UpdateRisqIds($epochIndex: Int!, $risqIds: [WalletRisqId!]!) {
+  updateRisqIds(epochIndex: $epochIndex, risqIds: $risqIds) {
+    wallet
+  }
+}
+
+mutation GenerateTicketsForAll {
+  generateTicketsForAll {
+    wallet
+  }
+}
+
+mutation GenerateTicket($wallet: WalletAddr!) {
+  generateTicket(wallet: $wallet) {
+    wallet
+    sequences {
+      nums
+      sequenceType
+    }
+  }
+}
+
+query AllStakeUpdateRequests {
+  allStakeUpdateRequests {
+    owner
+    state
+  }
+}
+
+mutation ApproveStakeUpdate($wallet: WalletAddr!) {
+  approveStakeUpdate(wallet: $wallet) {
+    transactionId
+  }
+}
+
+mutation CompleteStakeUpdate($wallet: WalletAddr!) {
+  completeStakeUpdate(wallet: $wallet) {
+    transactionId
+  }
+}
+
+mutation CreateEpoch(
+  $prizes: PrizesInput!
+  $expectedDurationMinutes: Int!
+  $yieldSplitCfg: YieldSplitCfgInput!
+) {
+  createEpoch(
+    prizes: $prizes
+    expectedDurationMinutes: $expectedDurationMinutes
+    yieldSplitCfg: $yieldSplitCfg
+  ) {
+    status
+  }
+}
+
+mutation EnterInvestment($investor: Investor!) {
+  enterInvestment(investor: $investor) {
+    status
+  }
+}
+
+mutation ExitInvestment($investor: Investor!, $returnAmount: String) {
+  exitInvestment(investor: $investor, returnAmount: $returnAmount) {
+    status
+  }
+}
+
+mutation PublishWinningCombination($winningCombination: [Int!]!) {
+  publishWinningCombination(winningCombination: $winningCombination) {
+    status
+  }
+}
+
+mutation PublishWinners {
+  publishWinners {
+    status
+  }
+}
+
+query CalculateOptimalWinningCombination {
+  calculateOptimalWinningCombination
+}
+
+query RandomWinningCombination {
+  randomWinningCombination
+}

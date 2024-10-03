@@ -1,0 +1,55 @@
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: nezha-runners
+  namespace: runners
+spec:
+  template:
+    spec:
+      serviceAccountName: devnet-github-runners
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: workerGroup
+                operator: In
+                values:
+                - "devnet-runners"
+      tolerations:
+        - key: scope
+          value: runners
+          operator: Equal
+          effect: NoSchedule
+      repository: NezhaLabs/nezha-monorepo
+      image: 440257901289.dkr.ecr.eu-west-1.amazonaws.com/github-runners:latest
+      env:
+        - name: RUNNER_FEATURE_FLAG_EPHEMERAL
+          value: "true"
+      labels:
+        - nezha-runners
+      resources:
+        requests:
+          cpu: 100m
+          memory: 100Mi
+          ephemeral-storage: 20Gi
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: HorizontalRunnerAutoscaler
+metadata:
+  name: nezha-runners-autoscaler
+  namespace: runners
+spec:
+  scaleTargetRef:
+    name: nezha-runners
+    # Uncomment the below in case the target is not RunnerDeployment but RunnerSet
+    #kind: RunnerSet
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: PercentageRunnersBusy
+    scaleUpThreshold: '0.75'    # The percentage of busy runners at which the number of desired runners are re-evaluated to scale up
+    scaleDownThreshold: '0.3'   # The percentage of busy runners at which the number of desired runners are re-evaluated to scale down
+    scaleUpAdjustment: 1        # The scale up runner count added to desired count
+    scaleDownAdjustment: 1      # The scale down runner count subtracted from the desired count
+

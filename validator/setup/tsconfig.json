@@ -1,0 +1,15 @@
+{
+  "extends": "@tsconfig/recommended/tsconfig.json",
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  },
+  "compilerOptions": {
+    "declaration": true,
+    "strictPropertyInitialization": false,
+    "moduleResolution": "node",
+    "module": "esnext",
+    "target": "esnext"
+  },
+}

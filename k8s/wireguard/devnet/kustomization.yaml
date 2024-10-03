@@ -1,0 +1,9 @@
+namespace: kube-system
+resources:
+  - deployment.yaml
+  - service.yaml
+  - pvc.yaml
+
+commonLabels:
+  app: wireguard
+

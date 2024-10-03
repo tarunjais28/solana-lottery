@@ -1,0 +1,70 @@
+Epoch States
+============
+
+- CREATED
+
+	Epoch is active. Users can stake/unstake.	
+
+	Queued staking/unstaking requests will get executed.
+
+- YIELDING
+	
+	Fund is moved out for investment.
+
+	Any staking/unstaking requests will be queued.
+
+- FINALISING
+	
+	Fund has been moved back into our contract.
+	Winners not declared.
+
+	Any staking/unstaking requests will be queued.
+
+- ENDED
+	
+	Winning combination recorded.
+	Winners declared.
+	Epoch is complete.
+
+	Any staking/unstaking requests will be queued.
+
+
+State Transition Instructions
+=============================
+
+CreateEpoch:
+	LatestEpoch.index += 1
+	Create new Epoch account with index=LatestEpoch.index
+
+	state = CREATED
+
+YieldWithdrawByInvestor / FranciumInvest:
+	Epoch.total_invested = DepositVault.amount
+
+	Transfer the contents of Deposit Vault to Investor's USDC ATA or into the Francium protocol.
+
+	state = YIELDING
+
+YieldDepositByInvestor / FranciumWithdrawInvestment:
+	Move funds from Investor's USDC ATA or the Francium protocol back into our program.
+
+	If return < deposit:
+		Move all of the returns into DepositVault
+		cumulative_return_rate *= return/deposit
+
+	Else, If there is enough money to pay jackpot insurer, set Epoch.draw_enabled = true
+		Move insurance amount into InsuranceVault.
+		Move deposited amount into DepositVault.
+		Move remaining amount into:
+			TreasuryVault, Tier2PrizeVault, Tier3PrizeVault as per configured ratio.
+
+	state = FINALISING
+
+PublishWinningCombination:
+	Epoch.winning_combination = combination
+	state = FINALISING
+
+PublishWinners:
+	assert!(Epoch.winning_combination != null)
+	Epoch.winners = winners
+	state = ENDED

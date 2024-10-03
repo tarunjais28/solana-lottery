@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devnet-wireguard
+  namespace: argocd
+  labels:
+    environment: devnet
+spec:
+  destination:
+    namespace: kube-system
+    name: in-cluster
+  project: default
+  source:
+    path: k8s/wireguard/devnet
+    repoURL: git@github.com:NezhaLabs/nezha-monorepo.git
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+

@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: indexer-epochs
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  template:
+    spec:
+      serviceAccountName: default-irsa
+      terminationGracePeriodSeconds: 10
+      containers:
+        - image: 440257901289.dkr.ecr.eu-west-1.amazonaws.com/indexer-epochs:latest
+          name: indexer-epochs
+          imagePullPolicy: Always
+          command:
+            - /app/indexer_epochs
+          resources:
+            limits:
+              cpu: 50m
+              memory: 100Mi
+            requests:
+              cpu: 10m
+              memory: 100Mi
+          env:
+            - name: INDEXER_NEZHA_GRAPHQL_URL
+              value: "http://lottery.internal.service/"
+            - name: INDEXER_EPOCH_START_SCHEDULE
+              value: "0_0_*_*_*_*"
+            - name: INDEXER_EPOCH_ENTER_INVESTMENT_OFFSET_SECONDS
+              value: "2400"
+            - name: INDEXER_EPOCH_EXIT_INVESTMENT_OFFSET_SECONDS
+              value: "2520"
+            - name: INDEXER_EPOCH_PUBLISH_WINNING_COMBINATION_OFFSET_SECONDS
+              value: "2580"
+            - name: INDEXER_EPOCH_PUBLISH_WINNERS_OFFSET_SECONDS
+              value: "2640"
+            - name: SOLANA_HTTP_RPC_URL
+              value: https://damp-solitary-smoke.solana-devnet.quiknode.pro
+            - name: SOLANA_STAKING_PROGRAM_ID
+              value: 7yxNN4Mkgap3LR4f5MdZBTtdTucSDMBcJvxbnfRcLFyV
+            - name: SOLANA_VRF_PROGRAM_ID
+              value: 3rLWyZao7xS9BjtJnoqgxPhkKTyWetHnHRxMcaESkaVx
+            - name: SOLANA_SPL_PROGRAM_ID
+              value: TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+            - name: SOLANA_ATA_PROGRAM_ID
+              value: ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL
+            - name: SOLANA_USDC_MINT
+              value: 7tWUTDppUCLm482XrHqZK5mqChepjVdWw6xAkGXRBLeC
+            - name: INDEXER_TIER1_PRIZE
+              value: "100000"
+            - name: INDEXER_TIER2_PRIZE_YIELD_SHARE
+              value: "1"
+            - name: INDEXER_TIER3_PRIZE_YIELD_SHARE
+              value: "1"
+            - name: INDEXER_YIELD_SPLIT_INSURANCE_JACKPOT
+              value: "100_000.0"
+            - name: INDEXER_YIELD_SPLIT_INSURANCE_PROBABILITY
+              value: "0.000_000_000_181_576_594"
+            - name: INDEXER_YIELD_SPLIT_INSURANCE_PREMIUM
+              value: "3.0"
+            - name: INDEXER_YIELD_SPLIT_TREASURY_RATIO
+              value: "0.0"
+            - name: FAKE_ARTKAI
+              value: "false"
+            - name: ARTKAI_WEBHOOK_URL
+              value: "https://nezha-api.devnet.nezha.fi/api/webhooks/handler"
+            - name: YIELD_RANGE_LOW
+              value: "0"
+            - name: YIELD_RANGE_HIGH
+              value: "2.5"
+            - name: WINNING_COMBINATION_SOURCE
+              value: "guaranteed_jackpot"
+            - name: INVESTOR
+              value: "fake"
+            - name: RUST_LOG
+              value: debug,hyper=off
+            - name: SWITCHBOARD_CONFIG
+              value: "fake"
+          envFrom:
+            - secretRef:
+                name: indexer-epochs-secrets
+

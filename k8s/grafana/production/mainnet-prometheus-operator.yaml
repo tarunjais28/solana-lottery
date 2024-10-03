@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: production-grafana-prometheus
+  namespace: argocd
+spec:
+  destination:
+    namespace: monitoring
+    name: production-nezha
+  project: default
+  source:
+    chart: kube-prometheus-stack
+    helm:
+      parameters:
+      - name: thanosRuler.thanosRulerSpec.priorityClassName
+        value: system-node-critical
+      - name: prometheus.prometheusSpec.priorityClassName
+        value: system-node-critical
+      - name: prometheusOperator.admissionWebhooks.patch.priorityClassName
+        value: system-node-critical
+      - name: alertmanager.alertmanagerSpec.priorityClassName
+        value: system-node-critical
+      - name: defaultRules.rules.etcd
+        value: "false"
+      - name: kubeEtcd.enabled
+        value: "false"
+      - name: kubeEtcd.service.enabled
+        value: "true"
+      - name: grafana.sidecar.dashboards.multicluster.etcd.enabled
+        value: "false"
+      - name: prometheusOperator.service.nodePort
+        value: "30823"
+      - name: prometheusOperator.service.type
+        value: NodePort
+      - name: prometheusOperator.service.nodePortTls
+        value: "30823"
+      values: "grafana:\n   securityContext:\n      runAsUser: 472\n      runAsGroup:
+        472\n      fsGroup: 65534\n   serviceAccount:\n      name: \"grafana\"\n
+        \     annotations: \n         eks.amazonaws.com/role-arn: \"arn:aws:iam::367391507260:role/production-nezha-grafana\"\n
+        \  additionalDataSources:\n      - name: CloudWatch\n        authType: default\n
+        \       defaultRegion: eu-west-1\n        type: cloudwatch\n   admin:\n      existingSecret:
+        grafana-secrets\n      userKey: admin-user\n   ingress:\n      enabled:
+        true\n      ingressClassName: nginx\n      hosts:\n         - grafana.internal.service\n
+        \  service:\n      enabled: true\n      type: NodePort\n      port: 80\n      targetPort:
+        3000\n      nodePort: 30824\nalertmanager:\n   ingress:\n      enabled: true\n
+        \     ingressClassName: nginx\n      hosts:\n         - alerts.internal.service\n
+        \        "
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: 38.0.2
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

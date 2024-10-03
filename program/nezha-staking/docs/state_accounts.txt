@@ -1,0 +1,79 @@
+State Accounts
+==============
+
+Notation: 
+	Foo(x, y) means an account whose PDA is derived using x and y. There will be different
+	accounts for different values of x and y.
+
+- Epoch(epoch_index) 
+	Information about an epoch.
+	Invested amount, return amount, how is the return split, etc.
+
+- LatestEpoch
+	Holds the index of the current epoch.
+	We use this index to derive the PDA of the current Epoch account.
+
+	Also holds the cumulative return rate of investments.
+	cumulative_return_rate = epoch_1_return_rate * epoch_2_return_rate * ...
+
+- Stake(owner)
+	Holds information about a user's stake.
+
+	Mainly: 
+		- starting_rate
+		- amount
+
+	When a user stakes, we store the current cumulative_return_rate into the
+	Stake account of the user:
+		Stake.starting_rate = LatestEpoch.cumulative_return_rate
+
+	To get the current value of the stake, we do:
+		Stake.amount * (LatestEpoch.cumulative_return_rate / Stake.starting_rate)
+
+	When the same user stakes a second time:
+		// Apply rates
+		Stake.amount = Stake.amount * (LatestEpoch.cumulative_return_rate / Stake.starting_rate)
+		Stake.starting_rate = LatestEpoch.cumulative_return_rate
+		// Add the new stake amount
+		Stake.amount += amount
+
+	Similarly for unstaking: Apply rates and then subtract the amount.
+
+- StakeUpdateRequest(owner)
+
+	We don't allow direct staking/unstaking into the contract, so that we can implement
+	an AML flow later.
+
+	Instead, the user first creates a StakeUpdateRequest { amount }
+		If amount > 0 (ie, type == Deposit):
+			amount is moved from user's USDC ATA into PendingDepositVault
+
+	The admin then issues ApproveStakeUpdate instruction, indicating AML check is completed.
+
+	If the current epoch is in Running state, a background process on behalf of the admin will issue CompleteStakeUpdate instruction.
+
+		If amount > 0 (ie, type == Deposit):
+			amount is moved from PendingDepositVault into DepositVault, and user's Stake account will reflect the new balance.
+
+		If amount < 0 (ie, type == Withdrawal):
+			amount = min(abs(amount), User's stake balance)
+			amount is moved from DepositVault into user's USDC ATA, and user's Stake account will reflect the new balance.
+
+- EpochWinnersMeta(epoch_index):
+	- epoch
+	- tier1, tier2, tier3:
+		- total prize amount for this tier
+		- claimable: true/false 
+			Used to mark the tier1 prize (jackpot) as unclaimable till we get it
+			funded from the insurance provider.
+	- status: track progress of uploading multiple pages of winners list
+
+- EpochWinnersPage(epoch_index, page):
+	- winners: Vec<Winner>
+		- winner wallet address
+		- tier
+		- prize
+		- claimed = true/false (to prevent double claiming)
+
+- StakingTicket(owner, epoch)
+	We upload the tickets of each user as they are generated into arweave and store the URI in this account, to prevent any tampering.

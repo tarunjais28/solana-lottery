@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prd-namespacelimits
+  namespace: argocd
+  labels:
+    environment: production
+spec:
+  destination:
+    namespace: kube-system
+    name: production-nezha
+  project: default
+  source:
+    path: k8s/namespacelimits/production
+    repoURL: git@github.com:mlabs-haskell/nezha.git
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

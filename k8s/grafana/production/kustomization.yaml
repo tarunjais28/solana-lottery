@@ -1,0 +1,12 @@
+namespace: monitoring
+
+bases:
+  - ../base
+  - ../dashboards
+  - dashboards
+
+patches:
+  - path: secrets.yaml
+    target:
+      kind: ExternalSecret
+      name: grafana-secrets

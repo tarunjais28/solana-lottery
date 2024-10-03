@@ -1,0 +1,10 @@
+impl_borsh_length!(u8, 1);
+impl_borsh_length!(i8, 1);
+impl_borsh_length!(u16, 2);
+impl_borsh_length!(i16, 2);
+impl_borsh_length!(u32, 4);
+impl_borsh_length!(i32, 4);
+impl_borsh_length!(u64, 8);
+impl_borsh_length!(i64, 8);
+impl_borsh_length!(u128, 16);
+impl_borsh_length!(i128, 16);

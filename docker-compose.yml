@@ -1,0 +1,87 @@
+
+# NOTE: Alwayse use long hand syntax for defining volume binds.
+# If we use the short-hand syntax, and source doesn't exist,
+# docker will implicitly create a directory in place of the source
+# This will cause the compilation of nezha_staking.so to fail cuz
+# a directory is there in it's place.
+# Here, docker-compose up will fail if the source doesn't exist,
+# saying file not found, which is a more intuitive behavior
+
+services:
+  postgres:
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./dockerfiles/lottery/postgres-init.d:/docker-entrypoint-initdb.d:Z
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8000:8080
+
+  store_migrations:
+    build:
+      dockerfile: Dockerfile
+      context: ./workspace/backend/lottery/store/
+    volumes:
+      - type: bind
+        source: ./workspace/backend/lottery/store/migrations:Z
+        target: /migrations
+    environment:
+      DATABASE_HOST_PORT: postgres:5432
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/lottery
+    depends_on:
+      - postgres
+
+  indexer_migrations:
+    build:
+      dockerfile: Dockerfile
+      context: ./workspace/backend/lottery/indexer/
+    volumes:
+      - type: bind
+        source: ./workspace/backend/lottery/indexer/migrations:Z
+        target: /migrations
+    environment:
+      DATABASE_HOST_PORT: postgres:5432
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/indexer
+    depends_on:
+      - postgres
+
+  validator:
+    build:
+      dockerfile: validator.Dockerfile
+      context: ./validator
+      args:
+        SOLANA_VERSION: 1.16.27
+    restart: always
+    ports:
+      - '8899:8899/tcp'
+      - '8900:8900/tcp'
+      - '8003:8003/udp'
+    environment:
+      RUST_LOG: solana_runtime::message_processor::stable_log=debug,solana=off
+      SOLANA_RUN_SH_VALIDATOR_ARGS: "--no-voting"
+
+  validator-setup:
+    build:
+      context: .
+      dockerfile: ./validator/validator-setup.Dockerfile
+      args:
+        SOLANA_VERSION: 1.16.27
+    volumes:
+      - type: bind
+        source: ./program/target/deploy/nezha_staking.so:Z
+        target: /root/programs/nezha_staking.so
+      - type: bind
+        source: ./program/target/deploy/nezha_vrf_mock.so:Z
+        target: /root/programs/nezha_vrf_mock.so
+    environment:
+      SOLANA_RPC_URL: http://validator:8899
+    depends_on:
+      - validator

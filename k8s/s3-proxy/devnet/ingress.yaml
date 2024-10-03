@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: s3-proxy-public-assets
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prd"
+spec:
+  tls:
+    - hosts:
+      - 's3-proxy-public-assets.devnet.nezha.fi'
+      secretName: s3-proxy-public-assets
+  ingressClassName: nginx
+  rules:
+  - host: s3-proxy-public-assets.devnet.nezha.fi
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: s3-proxy-public-assets
+            port:
+              number: 80
+

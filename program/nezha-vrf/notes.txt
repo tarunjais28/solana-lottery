@@ -1,0 +1,77 @@
+VRF
+---
+
+- Test VRF Impl in devnet
+	- Initialize VRF Account
+		- Check TS example
+			- See which functions they are calling
+			- Replicate them inside VRF init instruction
+
+- Add error handling for draw not enabled case
+
+
+Decisions
+---------
+- We don't want to setup our own copy of Switchboard VRF
+	- It's hard to do
+	- They might update it and it will stop working while our tests will continue being green
+	- It's not that hard to have an extra set of tests just for VRF
+
+- Add a separate VrfInit instruction and set Option<{switchboard_program_id, vrf_account}> on LatestEpoch.
+	In request vrf and consume vrf, return an error (VrfNotInit) if this is not set.
+
+Questions
+---------
+	- Why do we need to provide callback during VrfLiteInit? 
+	  Isn't it also supplied during VrfLiteRequestRandomness?
+		Is it because callback of VrfLiteRequestRandomness is optional? 
+		That is, if it's None, the callback supplied during Init will be used?
+		A: Yes. Just use any one of them.
+
+Code
+----
+
+vrfLiteInit:
+	Accounts:
+	- authority
+			VrfAuthority PDA
+	- vrf [signer, writable]
+			Vrf PDA
+	- mint
+			?? SwitchBoardProgram.mint
+	- escrow
+			getATA(mint, vrf)
+	- queueAuthority
+			Load SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE
+			Get its authority
+	- queue
+			SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE
+	- permission [writable]
+			PermissionAccount.fromSeed(SwitchBoardProgram, authority, queue, vrf)
+	- programState
+			SwitchBoardProgram.programState
+	- payer [signer, writable]
+		--
+	- tokenProgram
+	- ataProgram
+	- systemProgram
+	- rent
+		--
+	Params:
+	- callback
+	- stateBump
+			SwitchBoardProgram.programState.bump
+	- expiration
+			0
+
+ProgramStateAccount PDA: PDA(["STATE"], SwitchBoardProgramId)
+PermissionAccount PDA: PDA(["PermissionAccountData", queueAuthority, queue, vrfLite], SwitchboardProgramId)
+
+Docs
+----
+AnchorProvider.env() creates an AnchorProvider(connection, wallet)
+	connection: Solana connection (env.ANCHOR_PROVIDER_URL)
+	wallet: NodeWallet.local() which loads a Keypair using fs.readFile(env.ANCHOR_WALLET)
+		This wallet will be the payer for all txns.
+
+

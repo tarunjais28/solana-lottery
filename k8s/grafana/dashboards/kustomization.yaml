@@ -1,0 +1,4 @@
+namespace: monitoring
+
+resources:
+  - dashboard-kube-overview-pod.yaml

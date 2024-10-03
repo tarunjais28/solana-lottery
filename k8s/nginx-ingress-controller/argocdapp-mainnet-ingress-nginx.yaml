@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mainnet-ingress-nginx
+  namespace: argocd
+spec:
+  destination:
+    namespace: kube-system
+    name: mainnet
+  project: default
+  source:
+    chart: ingress-nginx
+    helm:
+      parameters:
+      # - name: controller.metrics.enabled
+      #   value: "true"
+      - name: controller.autoscaling.enabled
+        value: 'false'
+      # - name: controller.autoscaling.minReplicas
+      #   value: '1'
+      # - name: controller.autoscaling.maxReplicas
+      #   value: '5'
+      # - name: controller.autoscaling.targetCPUUtilizationPercentage
+      #   value: '75'
+      # - name: controller.autoscaling.targetMemoryUtilizationPercentage
+      #   value: '90'
+      - name: controller.metrics.serviceMonitor.enabled
+        value: 'true'
+      values: |
+        controller:
+          # config:
+          #   client-body-buffer-size: "1M"
+          service:
+            externalTrafficPolicy: Local
+            annotations:
+              service.beta.kubernetes.io/aws-load-balancer-type: nlb
+              service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+              service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '60'
+              service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: 'true'
+          # resources:
+          #   requests:
+          #     cpu: 100m
+          #     memory: 400Mi
+          #   limits:
+          #     cpu: 100m
+          #     memory: 1Gi
+    repoURL: https://kubernetes.github.io/ingress-nginx
+    targetRevision: 4.8.3
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+

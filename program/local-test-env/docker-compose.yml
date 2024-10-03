@@ -1,0 +1,42 @@
+# NOTE: Alwayse use long hand syntax for defining volume binds.
+# If we use the short-hand syntax, and source doesn't exist,
+# docker will implicitly create a directory in place of the source
+# This will cause the compilation of nezha_staking.so to fail cuz
+# a directory is there in it's place.
+# Here, docker-compose up will fail if the source doesn't exist,
+# saying file not found, which is a more intuitive behavior
+
+services:
+  validator:
+    build:
+      dockerfile: validator.Dockerfile
+      context: ./validator
+      args:
+        SOLANA_VERSION: 1.16.27
+    restart: always
+    ports:
+      - '8899:8899/tcp'
+      - '8900:8900/tcp'
+      - '8003:8003/udp'
+
+  validator-setup:
+    build:
+      context: .
+      dockerfile: ./validator/validator-setup.Dockerfile
+      args:
+        SOLANA_VERSION: 1.16.27
+    volumes:
+      - type: bind
+        source: ../target/deploy/nezha_staking.so
+        target: /root/programs/nezha_staking.so
+      - type: bind
+        source: ../target/deploy/staking.so
+        target: /root/programs/staking.so
+      - type: bind
+        source: ../target/deploy/nezha_vrf_mock.so
+        target: /root/programs/nezha_vrf_mock.so
+    environment:
+      SOLANA_RPC_URL: http://validator:8899
+    depends_on:
+      - validator
+    restart: no

@@ -1,0 +1,18 @@
+[package]
+name = "nezha-staking-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+borsh.workspace = true
+chrono = "0.4.19"
+nezha_staking_lib = { path = "../nezha-staking-lib" }
+num-traits = "0.2.15"
+rand = "0.8"
+# service = { path = "../service" }
+solana-client = {workspace=true}
+solana-program = {workspace=true}
+solana-sdk = {workspace=true}
+spl-associated-token-account = {workspace = true}
+spl-token = {workspace=true}
+# workspace-hack = { version = "0.1", path = "../../../workspace-hack" }

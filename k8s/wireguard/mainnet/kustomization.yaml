@@ -1,0 +1,16 @@
+resources:
+  - ../devnet
+
+patchesJson6902:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: wireguard
+    path: patch-deployment.yaml
+  - target:
+      version: v1
+      kind: PersistentVolume
+      name: wireguard-pv
+    path: patch-pvc.yaml
+

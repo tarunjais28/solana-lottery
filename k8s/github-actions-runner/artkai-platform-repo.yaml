@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: devnet-artkai-platform
+  name: devnet-artkai-platform
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: devnet-artkai-platform
+  template:
+    metadata:
+      labels:
+        app: devnet-artkai-platform
+    spec:
+      serviceAccountName: devnet-github-runners
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: workerGroup
+                    operator: In
+                    values:
+                      - "devnet-runners"
+      tolerations:
+        - key: scope
+          value: runners
+          operator: Equal
+          effect: NoSchedule
+      containers:
+        - name: runner
+          image: docker-public.packages.atlassian.com/sox/atlassian/bitbucket-pipelines-runner
+          env:
+            - name: WORKING_DIRECTORY
+              value: "/tmp"
+            - name: RUNTIME_PREREQUISITES_ENABLED
+              value: "true"
+            - name: REPOSITORY_UUID
+              value: "{5fc1614d-3dab-4298-8c25-56074eca99eb}"
+          envFrom:
+            - secretRef:
+                name: bitbucket-runners-artkai-secrets
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: docker-containers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+            - name: var-run
+              mountPath: /var/run
+          # resources:
+          #   requests:
+          #     memory: "50Mi"
+          #     cpu: "80m"
+          #   limits:
+          #     memory: "500Mi"
+          #     cpu: "400m"
+        - name: docker
+          image: docker:26.0.0-dind
+          securityContext:
+            privileged: true
+          env:
+            - name: DOCKER_OPTS
+              value: "--mtu=1300"
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: docker-containers
+              mountPath: /var/lib/docker/containers
+            - name: var-run
+              mountPath: /var/run
+          # resources:
+          #   requests:
+          #     memory: "50Mi"
+          #     cpu: "80m"
+          #   limits:
+          #     memory: "500Mi"
+          #     cpu: "400m"
+      volumes:
+        - name: tmp
+        - name: docker-containers
+        - name: var-run

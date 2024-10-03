@@ -1,0 +1,6 @@
+namespace: monitoring
+
+bases:
+  - ../base
+  - ../dashboards
+  - dashboards

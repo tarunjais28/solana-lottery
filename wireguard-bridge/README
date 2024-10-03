@@ -1,0 +1,32 @@
+How to configure:
+	Copy the following files to ./wireguard/wg-configs/:
+		- nezha-prod.conf
+		- nezha-testnet.conf
+		- nezha-staging.conf
+
+How to run:
+	Run `just start`
+
+How it works:
+	If you go to any of:
+		- nezha-staging.localhost
+		- nezha-testnet.localhost
+		- nezha-testnet2.localhost
+		- nezha-prod.localhost
+	the request will go to caddy listening on *:80 on localhost.
+	We are using (https://github.com/lucaslorentz/caddy-docker-proxy) to auto-configure the caddy
+	server so that it routes these hostnames to different containers.
+
+	There are 1 container each for the above URLs.
+	Inside each of them, it is connected to the respective wireguard server.
+	Each of them also have a caddy server that forwards all requests to localhost:80 to lottery.internal.service:80.
+	
+
+Basically:
+
+	[Browser] --> [Top Level Caddy] --> [Container | [Caddy] --> [Wireguard] --> [GraphQL]] 
+									^
+									|
+									|
+ (auto configured using docker-caddy-proxy)
+

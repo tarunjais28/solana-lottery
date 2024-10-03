@@ -1,0 +1,37 @@
+[package]
+name = "farming-pool"
+version = "0.1.0"
+edition = "2018"
+license = "WTFPL"
+publish = false
+
+[dependencies]
+solana-program = "1.7.4"
+spl-token = { version = "3.1.1", features = ["no-entrypoint"] }
+spl-math = { version = "0.1", features = [ "no-entrypoint" ] }
+arrayref = "0.3.6"
+num-derive = "0.3"
+num-traits = "0.2"
+num_enum = "0.5.1"
+thiserror = "1.0"
+enum_dispatch = "0.3.4"
+borsh.workspace = true
+flux-aggregator = { git = "https://github.com/octopus-network/solana-flux-aggregator", branch = "9cfaec5", features = ["no-entrypoint"] }
+uint = "0.8.5"
+
+[features]
+no-entrypoint = []
+test-bpf = []
+
+[dev-dependencies]
+assert_matches = "1.4.0"
+solana-program-test = {workspace = true}
+solana-sdk = {workspace = true}
+base64 = "0.13"
+log = "0.4.14"
+proptest = "0.10"
+serde = "1.0"
+serde_yaml = "0.8"
+
+[lib]
+crate-type = ["cdylib", "lib"]

@@ -1,0 +1,2 @@
+- [] Expose switchboard status
+- [] Expose switchboard api call, remove hack
